@@ -1,2 +1,4 @@
+# [Reddit](https://reddit.com) /s count bot
+`auth_example.py` shows how `auth.py` should look like
 
-"auth.py" file should include id, secret, user\_agent, username, password, which could be found when creating a reddit bot
+Refer to PRAW (Python Reddit API Wrapper) documentation for details
