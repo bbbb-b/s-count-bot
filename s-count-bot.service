@@ -5,8 +5,8 @@ Description=Reddit /s count bot
 Type=simple
 Restart=always
 RestartSec=1
-WorkingDirectory=%h/Services/s_count_bot
-ExecStart=/usr/bin/python3 %h/Services/s_count_bot/main.py auth.json log.txt
+WorkingDirectory=%h/Services/s-count-bot
+ExecStart=/usr/bin/env python3 %h/Services/s-count-bot/main.py auth.json
 
 
 [Install]

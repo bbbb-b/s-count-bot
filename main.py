@@ -8,15 +8,12 @@ import sys
 import traceback
 
 logfile = None
-def log(text):
-	if logfile != None:
-		fd = os.open(logfile, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
-		os.write(fd, (text + "\n").encode("utf-8"))
-		os.close(fd)
+def log(*args, **kwargs):
+	print(*args, **kwargs, file = sys.stderr)
+	sys.stderr.flush()
 
-if len(sys.argv) < 2 or len(sys.argv) > 3:
-	log("Usage: {} <auth-file> [log-file]\n".format(sys.argv[0]))
-	sys.stderr.write("Usage: {} <auth-file> [log-file]\n".format(sys.argv[0]))
+if len(sys.argv) != 2:
+	log(f"Usage: {sys.argv[0]} <auth-file>")
 	exit(1)
 try:
 	auth = json.load(open(sys.argv[1]))
@@ -28,23 +25,10 @@ try:
 		password = auth["password"]
 	)
 except:
-	log("Invalid auth file\n")
-	sys.stderr.write("Invalid auth file\n")
+	log("Invalid auth file")
 	exit(1)
 
-if reddit.read_only:
-	log("Invalid credentials\n")
-	sys.stderr.write("Invalid credentials\n")
-	exit(1)
-
-if len(sys.argv) == 3:
-	logfile = sys.argv[2]
-	try:
-		log("Bot starting...")
-	except:
-		log("Invalid log file (?)\n")
-		sys.stderr.write("Invalid log file (?)\n")
-		exit(1)
+log("bot starting")
 
 replystring = "u/{} has said '/s' {} times.\nTag me in a reply to anyone or mention me as \"u/scountbot u/{{targetperson}}\" anywhere if you want me to count how many times they've said '/s' !"
 failreplystring = "Replying failed. Retrying in {} seconds"
