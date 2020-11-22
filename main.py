@@ -7,7 +7,6 @@ import json
 import sys
 import traceback
 
-logfile = None
 def log(*args, **kwargs):
 	print(*args, **kwargs, file = sys.stderr)
 	sys.stderr.flush()
