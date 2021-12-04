@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import praw
+from praw.exceptions import PRAWException
 import time
 import re
 import os
@@ -38,7 +39,13 @@ def try_replying(comment, reply):
 		try:
 			comment.reply(reply);
 			break;
-		except:
+		except PRAWException as e:
+			if "THREAD_LOCKED" in str(e):
+				log("thread locked")
+				break
+			if "TOO_OLD" in str(e):
+				log("too old")
+				break
 			log(traceback.format_exc())
 			log(failreplystring.format(sleeptime))
 			time.sleep(sleeptime)
@@ -72,13 +79,22 @@ while True:
 						target_user = reddit.redditor(words[1][3:])
 					else:
 						target_user = comment.parent().author
-				except:
+				except Exception as e:
+					if isinstance(e, KeyboardInterrupt):
+						break
 					log(traceback.format_exc())
 					log("Getting user u/{} failed.".format(words[1][2:]))
 					reddit.inbox.mark_read([comment])
 					continue
 			if target_user == None:
-				target_user = comment.parent().author
+				try:
+					target_user = comment.parent().author
+				except Exception as e:
+					if isinstance(e, KeyboardInterrupt):
+						break
+					log("i dont even know at this point")
+					reddit.inbox.mark_read([comment])
+					continue
 			if target_user != None:
 				if  target_user.name == reddit.user.me().name:
 					try_replying(comment, "Real creative buddy.")
@@ -88,11 +104,13 @@ while True:
 					scnt = 0
 					try:
 						for usercomment in target_user.comments.new(limit = None):
-							scnt += count_s(usercomment.body)	
+							scnt += count_s(usercomment.body)
 						log("{} - {}".format(target_user, scnt))
 						try_replying(comment, replystring.format(target_user.name, scnt))
 						reddit.inbox.mark_read([comment])
-					except:
+					except Exception as e:
+						if isinstance(e, KeyboardInterrupt):
+							break
 						log(traceback.format_exc())
 						log("failed - \"{}\"".format(comment.body))
 						reddit.inbox.mark_read([comment])
@@ -105,6 +123,8 @@ while True:
 		found = False
 		time.sleep(60)
 	except Exception as e:
+		if isinstance(e, KeyboardInterrupt):
+			break
 		log(traceback.format_exc())
 		log("unknown error")
 		time.sleep(30)
